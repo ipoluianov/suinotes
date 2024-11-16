@@ -1,5 +1,5 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import { Flex, Heading, Text } from "@radix-ui/themes";
+import { Button, Flex, Heading, Text } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 
 export function Notes({
@@ -52,20 +52,12 @@ export function Notes({
     return (
         <Flex direction="column" my="2">
             {data.data.length === 0 ? (
-                <Text>No objects owned by the connected wallet</Text>
+                <Text>No notes to display</Text>
             ) : (
-                <Heading size="4">Objects owned by the connected wallet</Heading>
+                <Heading size="4">My notes</Heading>
             )}
-
-            <h1>Objects</h1>
             {objects.map((object) => (
-                <div><button onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</button></div>
-            ))}
-            <h1>asdas</h1>
-            {data.data.map((object) => (
-                <Flex key={object.data?.objectId}>
-                    <Text>Object ID: {object.data?.objectId} {object.data?.type}</Text>
-                </Flex>
+                <div style={{margin: "10px; "}}><Button style={{width: "100%"}} onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</Button></div>
             ))}
         </Flex>
     );

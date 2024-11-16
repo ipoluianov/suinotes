@@ -58,7 +58,7 @@ function App() {
   							}}
  />
   				{currentAccount ? (
-            <Heading>OK</Heading>
+            <Heading></Heading>
   				) : (
   					<Heading>Please connect your wallet</Heading>
   				)
