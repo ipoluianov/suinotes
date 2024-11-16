@@ -44,7 +44,18 @@ const USDC_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9
 			return;
 		  }
 
-		const coin = tx.splitCoins(coins[0].coinObjectId, [100000000000n]);
+		console.log('coins', coins);
+
+		let coinsIDs = coins.map((coin) => coin.coinObjectId);
+
+		let coinsIDsFromSecondItem = coinsIDs.slice(1);
+
+		const res = tx.mergeCoins(coins[0].coinObjectId, coinsIDsFromSecondItem);
+
+		console.log('mergedCoin', res);
+
+		const coin = tx.splitCoins(coins[0].coinObjectId, [2000000000n]);
+		console.log('coin', coin);
 
 		tx.moveCall({
 			arguments: [coin],
