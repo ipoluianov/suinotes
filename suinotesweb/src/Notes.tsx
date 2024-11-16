@@ -1,5 +1,5 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import { Button, Flex, Heading, Text } from "@radix-ui/themes";
+import { Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 
 export function Notes({
@@ -50,14 +50,14 @@ export function Notes({
     }
 
     return (
-        <Flex direction="column" my="2">
+        <Flex direction="column" my="2" >
             {data.data.length === 0 ? (
                 <Text>No notes to display</Text>
             ) : (
                 <Heading size="4">My notes</Heading>
             )}
             {objects.map((object) => (
-                <div style={{margin: "10px; "}}><Button style={{width: "100%"}} onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</Button></div>
+                <Container key={object?.objectId} style={{margin: "10px"}}><Button style={{width: "100%"}} onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</Button></Container>
             ))}
         </Flex>
     );

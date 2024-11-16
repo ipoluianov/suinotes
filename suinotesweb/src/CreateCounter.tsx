@@ -44,7 +44,7 @@ const USDC_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9
 			return;
 		  }
 
-		const coin = tx.splitCoins(coins[0].coinObjectId, [100n]);
+		const coin = tx.splitCoins(coins[0].coinObjectId, [100000000000n]);
 
 		tx.moveCall({
 			arguments: [coin],

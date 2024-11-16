@@ -12,16 +12,26 @@ module counter::counter {
 		text: String
 	}
 
-	public fun create(payment: Coin<snttoken::snt::SNT>, ctx: &mut TxContext) : Counter {
+	public fun create(payment: Coin<snttoken::snt::SNT>, ctx: &mut TxContext) {
         let balance = coin::value(&payment);
         assert!(balance >= REQUIRED_AMOUNT);
         
-		transfer::public_transfer(payment, RECIPIENT_ADDRESS);
+		//coin::drop(payment);
 
-		Counter {
+		let item = Counter {
 			id: object::new(ctx),
 			text: b"text".to_string()
-		}
+		};
+
+		transfer::public_transfer(payment, RECIPIENT_ADDRESS);
+		transfer::transfer(item, ctx.sender())
+		
+	}
+
+	public fun create1(payment: Coin<snttoken::snt::SNT>, _ctx: &mut TxContext) {
+        let balance = coin::value(&payment);
+        assert!(balance >= REQUIRED_AMOUNT);
+		transfer::public_transfer(payment, RECIPIENT_ADDRESS);
 	}
 
 	public entry fun set_value(counter: &mut Counter, value: String, _ctx: &TxContext) {
