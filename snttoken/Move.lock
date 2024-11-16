@@ -2,11 +2,10 @@
 
 [move]
 version = 3
-manifest_digest = "EAC777DA4052A1C562E59EC6E7DC954457AA9F7FE620CBA24E9397D8CBECC81A"
-deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
+manifest_digest = "A8EBD63DD05E5860476AA1E0949230B9B1DD6CE007632F1CD9E21AED3F31E7E4"
+deps_digest = "F8BBB0CCB2491CA29A3DF03D6F92277A4F3574266507ACD77214D37ECA3F3082"
 dependencies = [
   { id = "Sui", name = "Sui" },
-  { id = "snttoken", name = "snttoken" },
 ]
 
 [[move.package]]
@@ -21,14 +20,6 @@ dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
 ]
 
-[[move.package]]
-id = "snttoken"
-source = { local = "../snttoken" }
-
-dependencies = [
-  { id = "Sui", name = "Sui" },
-]
-
 [move.toolchain-version]
 compiler-version = "1.36.2"
 edition = "2024.beta"
@@ -38,6 +29,6 @@ flavor = "sui"
 
 [env.test]
 chain-id = "4c78adac"
-original-published-id = "0x10bd46c0c367abe3a30834247709008401fca8f1cdca00d4341beb6053d6e629"
-latest-published-id = "0x10bd46c0c367abe3a30834247709008401fca8f1cdca00d4341beb6053d6e629"
+original-published-id = "0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc"
+latest-published-id = "0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc"
 published-version = "1"

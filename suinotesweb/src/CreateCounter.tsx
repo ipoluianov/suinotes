@@ -3,58 +3,84 @@ import { Button, Container } from "@radix-ui/themes";
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "./networkConfig";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+
 
 export function CreateCounter({
-  onCreated,
+	onCreated,
 }: {
-  onCreated: (id: string) => void;
+	onCreated: (id: string) => void;
 }) {
-  const counterPackageId = useNetworkVariable("counterPackageId");
-  const suiClient = useSuiClient();
-  const {
-  	mutate: signAndExecute,
-  	isSuccess,
-  	isPending,
-  } = useSignAndExecuteTransaction();
+	const currentAccount = useCurrentAccount();
+	const counterPackageId = useNetworkVariable("counterPackageId");
+	const suiClient = useSuiClient();
+	const {
+		mutate: signAndExecute,
+		isSuccess,
+		isPending,
+	} = useSignAndExecuteTransaction();
 
-  function create() {
-  	const tx = new Transaction();
+	// 0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT
 
-  	tx.moveCall({
-  		arguments: [],
-  		target: `${counterPackageId}::counter::create`,
-  	});
+	// Define the USDC token type on Sui testnet
+// This is the unique identifier for the USDC token on Sui
+const USDC_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
 
-  	signAndExecute(
-  		{
-  			transaction: tx,
-  		},
-  		{
-  			onSuccess: async ({ digest }) => {
-  				const { effects } = await suiClient.waitForTransaction({
-  					digest: digest,
-  					options: {
-  						showEffects: true,
-  					},
-  				});
 
-  				onCreated(effects?.created?.[0]?.reference?.objectId!);
-  			},
-  		},
-  	);
-  }
+	const create = async () => {
+		if (!currentAccount) {
+			return;
+		}
 
-  return (
-  	<Container>
-  		<Button
-  			size="3"
-  			onClick={() => {
-  				create();
-  			}}
-  			disabled={isSuccess || isPending}
-  		>
-  			{isSuccess || isPending ? <ClipLoader size={20} /> : "Create Counter"}
-  		</Button>
-  	</Container>
-  );
+		const tx = new Transaction();
+
+		const { data: coins } = await suiClient.getCoins({
+			owner: currentAccount.address,
+			coinType: USDC_TYPE,
+		  });
+
+		  if (coins.length === 0) {
+			console.log('No USDC coins found');
+			return;
+		  }
+
+		const coin = tx.splitCoins(coins[0].coinObjectId, [100n]);
+
+		tx.moveCall({
+			arguments: [coin],
+			target: `${counterPackageId}::counter::create`,
+		});
+
+		signAndExecute(
+			{
+				transaction: tx,
+			},
+			{
+				onSuccess: async ({ digest }) => {
+					const { effects } = await suiClient.waitForTransaction({
+						digest: digest,
+						options: {
+							showEffects: true,
+						},
+					});
+
+					onCreated(effects?.created?.[0]?.reference?.objectId!);
+				},
+			},
+		);
+	}
+
+	return (
+		<Container>
+			<Button
+				size="3"
+				onClick={() => {
+					create();
+				}}
+				disabled={isSuccess || isPending}
+			>
+				{isSuccess || isPending ? <ClipLoader size={20} /> : "Create Counter"}
+			</Button>
+		</Container>
+	);
 }
