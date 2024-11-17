@@ -10,9 +10,14 @@ import { DError, makeError } from "./error.ts";
 
 export function CreateCounter({
 	onCreated,
+	visible,
 }: {
 	onCreated: (id: string) => void;
+	visible: boolean;
 }) {
+	if (!visible) {
+		return null;
+	}
 	const currentAccount = useCurrentAccount();
 	const counterPackageId = useNetworkVariable("counterPackageId");
 	const suiClient = useSuiClient();
@@ -26,7 +31,7 @@ export function CreateCounter({
 
 	const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
 
-	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint): (TransactionResult | DError) => {
+	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint): (Promise<TransactionResult | DError>) => {
 		if (!account) {
 			return makeError("No account");
 		}
@@ -163,7 +168,7 @@ export function CreateCounter({
 				}}
 				disabled={isCreating}
 			>
-				{isCreating ? <ClipLoader size={20} /> : "Create Counter"}
+				{isCreating ? <ClipLoader size={20} /> : "Create Note"}
 			</Button>
 		</Container>
 	);

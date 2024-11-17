@@ -4,9 +4,15 @@ import { useNetworkVariable } from "./networkConfig";
 
 export function Notes({
     onSelected,
+    visible,
   }: {
     onSelected: (id: string) => void;
+    visible: boolean;
   }) {
+    if (!visible) {
+        return null;
+    }
+    
     const counterPackageId = useNetworkVariable("counterPackageId");
 
     const account = useCurrentAccount();
