@@ -26,7 +26,7 @@ export function CreateCounter({
 
 	const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
 
-	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint) : (TransactionResult | DError) => {
+	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint): (TransactionResult | DError) => {
 		if (!account) {
 			return makeError("No account");
 		}
@@ -108,17 +108,48 @@ export function CreateCounter({
 						digest: digest,
 						options: {
 							showEffects: true,
+							showRawEffects: true,
 						},
 					});
+					
+					console.log('effects', effects);
+					let createdObjects = effects?.created;
+					if (!createdObjects || createdObjects.length === 0) {
+						alert("No object created");
+						setIsCreating(false);
+						return;
+					}
 
-					onCreated(effects?.created?.[0]?.reference?.objectId!);
+					// find object with type Counter
+					for (let i = 0; i < createdObjects.length; i++) {
+						const obj = createdObjects[i];
+
+						// Get Object By ID
+						const data = await suiClient.getObject({
+							id: obj.reference.objectId,
+							options: {
+								showType: true,
+							},
+						});
+
+						if (data.data?.type === `${counterPackageId}::counter::Counter`) {
+							onCreated(obj.reference.objectId);
+							setIsCreating(false);
+							return;
+						}
+					}
+
+					alert("No Counter object created");
+
+
+					//onCreated(effects?.created?.[0]?.reference?.objectId!);
 					setIsCreating(false);
 				},
 				onError: (error) => {
 					alert("Error: " + error);
 					setIsCreating(false);
 				}
-				
+
 			},
 		);
 	}
