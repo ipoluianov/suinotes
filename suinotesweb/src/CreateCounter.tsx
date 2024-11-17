@@ -20,11 +20,7 @@ export function CreateCounter({
 		isPending,
 	} = useSignAndExecuteTransaction();
 
-	// 0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT
-
-	// Define the USDC token type on Sui testnet
-// This is the unique identifier for the USDC token on Sui
-const USDC_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
+	const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
 
 
 	const create = async () => {
@@ -36,18 +32,17 @@ const USDC_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9
 
 		const { data: coins } = await suiClient.getCoins({
 			owner: currentAccount.address,
-			coinType: USDC_TYPE,
+			coinType: SNT_TYPE,
 		  });
 
 		  if (coins.length === 0) {
-			console.log('No USDC coins found');
+			console.log('No coins found');
 			return;
 		  }
 
 		console.log('coins', coins);
 
 		let coinsIDs = coins.map((coin) => coin.coinObjectId);
-
 		let coinsIDsFromSecondItem = coinsIDs.slice(1);
 
 		const res = tx.mergeCoins(coins[0].coinObjectId, coinsIDsFromSecondItem);
