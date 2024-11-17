@@ -6,7 +6,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import type { WalletAccount } from '@mysten/wallet-standard';
 import React from "react";
-
+import { DError, makeError } from "./error.ts";
 
 export function CreateCounter({
 	onCreated,
@@ -26,9 +26,14 @@ export function CreateCounter({
 
 	const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
 
-	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: number) : (TransactionResult | string) => {
+	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint) : (TransactionResult | DError) => {
 		if (!account) {
-			return "No account";
+			return makeError("No account");
+		}
+
+		const coinTypeParts = coinType.split('::');
+		if (coinTypeParts.length !== 3) {
+			return makeError("Invalid coin type");
 		}
 
 		const coinSymbol = coinType.split('::')[2];
@@ -39,7 +44,7 @@ export function CreateCounter({
 		});
 
 		if (coins.length === 0) {
-			return "No " + coinSymbol + " found";
+			return makeError("No " + coinSymbol + " found");
 		}
 
 		let totalBalance = 0n;
@@ -48,38 +53,26 @@ export function CreateCounter({
 			totalBalance += balanceAsBitInt;
 		}
 
-		let totalBalanceAsFloat = parseFloat(totalBalance.toString()) / 1000000000;
-		console.log('Total balance', totalBalanceAsFloat);
-
-		if (totalBalance < amount) {
+		//let totalBalanceAsFloat = parseFloat(totalBalance.toString()) / 1000000000;
+		if (BigInt(totalBalance) < amount) {
 			console.log('Not enough balance');
-			return "Not enough " + coinSymbol + " balance";
+			return makeError("Not enough " + coinSymbol + " balance");
 		}
 
 		console.log('Coins found', coins);
 
 		// Try to find a coin with enough amount
-
-		// coin.balance is BitInt
-		// let coinWithEnoughAmount = coins.find((coin) => coin.balance >= amount);
 		let coinWithEnoughAmount = coins.find((coin) => BigInt(coin.balance) >= BigInt(amount));
-
 		if (coinWithEnoughAmount) {
 			const coin = tx.splitCoins(coinWithEnoughAmount.coinObjectId, [amount]);
-			console.log('Coin with enough amount found', coinWithEnoughAmount);
 			return coin;
 		}
 
 		// Merge all coins into the first coin
 		let coinsIDs = coins.map((coin) => coin.coinObjectId);
 		let coinsIDsFromSecondItem = coinsIDs.slice(1);
-		const res = tx.mergeCoins(coins[0].coinObjectId, coinsIDsFromSecondItem);
-		if (!res) {
-			console.log('mergeCoins failed');
-			return "";
-		}
+		tx.mergeCoins(coins[0].coinObjectId, coinsIDsFromSecondItem);
 		const coin = tx.splitCoins(coins[0].coinObjectId, [amount]);
-
 		return coin;
 	}
 
@@ -90,11 +83,11 @@ export function CreateCounter({
 
 		const tx = new Transaction();
 
-		const coin = await prepareCoin(currentAccount, tx, SNT_TYPE, 2000000000);
+		const coin = await prepareCoin(currentAccount, tx, SNT_TYPE, 2000000000n);
 		console.log('coin', coin);
-		if (typeof coin === 'string') {
-			//console.log('Cannot get coin');
-			alert('Error: ' + coin);
+		// if coin is a DError
+		if ('errorMessage' in coin) {
+			alert('Error: ' + coin.errorMessage);
 			return;
 		}
 
