@@ -1,19 +1,22 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import { useSignPersonalMessage } from "@mysten/dapp-kit";
 
 export function Notes({
     onSelected,
     visible,
-  }: {
+}: {
     onSelected: (id: string) => void;
     visible: boolean;
-  }) {
+}) {
     if (!visible) {
         return null;
     }
-    
+
     const counterPackageId = useNetworkVariable("counterPackageId");
+    const { mutate: signPersonalMessage } = useSignPersonalMessage();
 
     const account = useCurrentAccount();
     const { data, isPending, error } = useSuiClientQuery(
@@ -55,6 +58,7 @@ export function Notes({
         onSelected(objectId);
     }
 
+
     return (
         <Flex direction="column" my="2" >
             {data.data.length === 0 ? (
@@ -63,7 +67,7 @@ export function Notes({
                 <Heading size="4">My notes</Heading>
             )}
             {objects.map((object) => (
-                <Container key={object?.objectId} style={{margin: "10px"}}><Button style={{width: "100%"}} onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</Button></Container>
+                <Container key={object?.objectId} style={{ margin: "10px" }}><Button style={{ width: "100%" }} onClick={() => setCurrentObjectId(object?.objectId)}>{object?.objectId}</Button></Container>
             ))}
         </Flex>
     );

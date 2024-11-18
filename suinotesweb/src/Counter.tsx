@@ -11,9 +11,10 @@ import { useNetworkVariable } from "./networkConfig";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { shortAddress } from "./utils";
+import { decryptMessage, encryptMessage } from "./aes";
 
-export function Counter({ 
-    id, 
+export function Counter({
+    id,
     visible,
     onBack
 }:
@@ -58,7 +59,27 @@ export function Counter({
             setIsLoading(false);
             return;
         }
-        setTextToSet(getCounterFields(result.data)?.text ?? "");
+
+        let key = "key";
+        while (key.length < 32) {
+            key += "0";
+        }
+        console.log("Key: ", key);
+
+        let encryptedData = getCounterFields(result.data)?.text;
+        if (encryptedData == null) {
+            setTextToSet("");
+            setIsLoading(false);
+            return;
+        }
+        let decryptedData = "";
+        try {
+            decryptedData = await decryptMessage(encryptedData, key);
+        } catch (e) {
+            console.log("Error: ", e);
+        }
+
+        setTextToSet(decryptedData);
         setIsLoading(false);
     }
 
@@ -80,15 +101,32 @@ export function Counter({
 
     const [waitingForTxn, setWaitingForTxn] = useState("");
 
-    const suiCallSetValue = () => {
+    const suiCallSetValue = async () => {
+        let key = "key";
+        while (key.length < 32) {
+            key += "0";
+        }
+        console.log("Key: ", key);
+
+        let encryptedData = "";
         if (id == null) return;
+        try {
+            let dataToEncrypt = textToSet;
+            encryptedData = await encryptMessage(dataToEncrypt, key);
+        } catch (e) {
+            console.log("Error: ", e);
+            alert("Error: " + e);
+            return;
+        }
+
+        console.log("Encrypted data: ", encryptedData);
 
         setWaitingForTxn("set_value");
         setIsWaitingForTransaction(true);
 
         const tx = new Transaction();
         tx.moveCall({
-            arguments: [tx.object(id), tx.pure.string(textToSet)],
+            arguments: [tx.object(id), tx.pure.string(encryptedData)],
             target: `${counterPackageId}::counter::set_value`,
         });
 
@@ -117,9 +155,22 @@ export function Counter({
         isDisabled = true;
     }
 
+    const copyIdToClipboard = () => {
+        if (id == null) return;
+        navigator.clipboard.writeText(id);
+    }
+
+    const openInBlockExploter = () => {
+        if (id == null) return;
+        window.open(`https://suiscan.xyz/testnet/object/${id}`, "_blank");
+    }
+   
     return (
         <>
-            <Heading size="3">Note {shortAddress(id)}</Heading>
+            <Heading size="3">Note {shortAddress(id)} 
+                <Button onClick={()=>{copyIdToClipboard()}}>COPY</Button>
+                <Button onClick={()=>{openInBlockExploter()}}>SUI SCAN</Button>
+                </Heading>
 
             <Flex direction="column" gap="2">
                 <Flex direction="row">

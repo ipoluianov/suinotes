@@ -23,8 +23,6 @@ export function CreateCounter({
 	const suiClient = useSuiClient();
 	const {
 		mutate: signAndExecute,
-		isSuccess,
-		isPending,
 	} = useSignAndExecuteTransaction();
 
 	const [isCreating, setIsCreating] = React.useState(false);
@@ -143,11 +141,7 @@ export function CreateCounter({
 							return;
 						}
 					}
-
 					alert("No Counter object created");
-
-
-					//onCreated(effects?.created?.[0]?.reference?.objectId!);
 					setIsCreating(false);
 				},
 				onError: (error) => {
