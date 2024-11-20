@@ -125,9 +125,13 @@ export function Counter({
         setIsWaitingForTransaction(true);
 
         const tx = new Transaction();
+        /*tx.moveCall({
+            arguments: [tx.object("0xdd0e75743b4981275611169a1be74b5f7973cc933e781bbb619b9afad98ec979"), tx.object(id), tx.pure.string(encryptedData)],
+            target: `${counterPackageId}::suinotes::set_value`,
+        });*/
         tx.moveCall({
-            arguments: [tx.object(id), tx.pure.string(encryptedData)],
-            target: `${counterPackageId}::counter::set_value`,
+            arguments: [tx.object("0x7dffc96776f81c41367a0430fbc89fcec32c518e4ac9320f3bd250047505f79f")],
+            target: `${counterPackageId}::fund::withdraw_coin`,
         });
 
         signAndExecute(
