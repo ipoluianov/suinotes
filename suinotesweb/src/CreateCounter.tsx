@@ -95,7 +95,7 @@ export function CreateCounter({
 		}
 
 		tx.moveCall({
-			arguments: [tx.object("0x7dffc96776f81c41367a0430fbc89fcec32c518e4ac9320f3bd250047505f79f"), coin],
+			arguments: [coin],
 			target: `${counterPackageId}::suinotes::create`,
 		});
 

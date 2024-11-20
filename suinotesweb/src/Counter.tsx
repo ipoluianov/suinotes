@@ -2,16 +2,21 @@ import {
 
     useSignAndExecuteTransaction,
     useSuiClient,
+    
 
 } from "@mysten/dapp-kit";
+import { Transaction, TransactionResult } from "@mysten/sui/transactions";
 import type { SuiObjectData } from "@mysten/sui/client";
-import { Transaction } from "@mysten/sui/transactions";
 import { Button, Flex, Heading } from "@radix-ui/themes";
 import { useNetworkVariable } from "./networkConfig";
 import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { shortAddress } from "./utils";
 import { decryptMessage, encryptMessage } from "./aes";
+import { makeError } from "./error";
+import type { WalletAccount } from '@mysten/wallet-standard';
+import { useCurrentAccount } from "@mysten/dapp-kit";
+
 
 export function Counter({
     id,
@@ -28,6 +33,10 @@ export function Counter({
         return null;
     }
 
+    const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
+
+
+	const currentAccount = useCurrentAccount();
     const counterPackageId = useNetworkVariable("counterPackageId");
     const suiClient = useSuiClient();
     const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -101,6 +110,57 @@ export function Counter({
 
     const [waitingForTxn, setWaitingForTxn] = useState("");
 
+    const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint): (Promise<TransactionResult | DError>) => {
+		if (!account) {
+			return makeError("No account");
+		}
+
+		const coinTypeParts = coinType.split('::');
+		if (coinTypeParts.length !== 3) {
+			return makeError("Invalid coin type");
+		}
+
+		const coinSymbol = coinType.split('::')[2];
+
+		const { data: coins } = await suiClient.getCoins({
+			owner: account.address,
+			coinType: coinType,
+		});
+
+		if (coins.length === 0) {
+			return makeError("No " + coinSymbol + " found");
+		}
+
+		let totalBalance = 0n;
+		for (let i = 0; i < coins.length; i++) {
+			let balanceAsBitInt = BigInt(coins[i].balance);
+			totalBalance += balanceAsBitInt;
+		}
+
+		//let totalBalanceAsFloat = parseFloat(totalBalance.toString()) / 1000000000;
+		if (BigInt(totalBalance) < amount) {
+			console.log('Not enough balance');
+			return makeError("Not enough " + coinSymbol + " balance");
+		}
+
+		console.log('Coins found', coins);
+
+		// Try to find a coin with enough amount
+		let coinWithEnoughAmount = coins.find((coin) => BigInt(coin.balance) >= BigInt(amount));
+		if (coinWithEnoughAmount) {
+			const coin = tx.splitCoins(coinWithEnoughAmount.coinObjectId, [amount]);
+			return coin;
+		}
+
+		// Merge all coins into the first coin
+		let coinsIDs = coins.map((coin) => coin.coinObjectId);
+		let coinsIDsFromSecondItem = coinsIDs.slice(1);
+		tx.mergeCoins(coins[0].coinObjectId, coinsIDsFromSecondItem);
+		const coin = tx.splitCoins(coins[0].coinObjectId, [amount]);
+		return coin;
+	}
+
+
     const suiCallSetValue = async () => {
         let key = "key";
         while (key.length < 32) {
@@ -125,13 +185,12 @@ export function Counter({
         setIsWaitingForTransaction(true);
 
         const tx = new Transaction();
-        /*tx.moveCall({
-            arguments: [tx.object("0xdd0e75743b4981275611169a1be74b5f7973cc933e781bbb619b9afad98ec979"), tx.object(id), tx.pure.string(encryptedData)],
-            target: `${counterPackageId}::suinotes::set_value`,
-        });*/
+        const coin = await prepareCoin(currentAccount, tx, SNT_TYPE, 2000000000n);
+		console.log('coin', coin);
+
         tx.moveCall({
-            arguments: [tx.object("0x7dffc96776f81c41367a0430fbc89fcec32c518e4ac9320f3bd250047505f79f")],
-            target: `${counterPackageId}::fund::withdraw_coin`,
+            arguments: [coin, tx.object(id), tx.pure.string(encryptedData)],
+            target: `${counterPackageId}::suinotes::set_value`,
         });
 
         signAndExecute(
