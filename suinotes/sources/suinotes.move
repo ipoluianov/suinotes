@@ -46,6 +46,7 @@ fun init(otw: SUINOTES, ctx: &mut TxContext) {
 	fund::create_fund(ctx);
 }
 
+#[allow(lint(self_transfer))]
 public fun create_note(f: &mut fund::Fund, payment: Coin<snttoken::snt::SNT>, ctx: &mut TxContext) {
 	let balance = coin::value(&payment);
 	assert!(balance >= REQUIRED_AMOUNT);

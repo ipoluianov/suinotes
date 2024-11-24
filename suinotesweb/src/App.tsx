@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Counter } from "./Counter";
 import { CreateCounter } from "./CreateCounter";
 import { Notes } from "./Notes";
+import { Fund } from "./Fund";
 
 function App() {
 	const currentAccount = useCurrentAccount();
@@ -67,6 +68,7 @@ function App() {
 							}}
 							visible={counterId == null}
 						/>
+						<Fund />
 					</Container>
 					{currentAccount ? (
 						<Heading></Heading>

@@ -32,10 +32,10 @@ export function Counter({
     const counterPackageId = useNetworkVariable("counterPackageId");
     const suiClient = useSuiClient();
     const { mutate: signAndExecute } = useSignAndExecuteTransaction();
-    const [isLoading, setIsLoading] = useState(false);
     const [isWaitingForTransaction, setIsWaitingForTransaction] = useState(false);
     const [latestId, setLatestId] = useState<string>("");
 
+    const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState<SuiObjectData | null | undefined>(null);
     const reloadData = () => {
         setData(null);
@@ -126,15 +126,11 @@ export function Counter({
         setIsWaitingForTransaction(true);
 
         const tx = new Transaction();
-        /*tx.moveCall({
-            arguments: [tx.object("0x16464947d9638a1a911d8fb2603084259be874921b3d762a0752ecfcde2c7dea"), tx.object(id), tx.pure.string(encryptedData)],
-            target: `${counterPackageId}::suinotes::set_value`,
-        });*/
-
         tx.moveCall({
-            arguments: [tx.object(TESTNET_COUNTER_FUND_ID)],
-            target: `${counterPackageId}::fund::withdraw`,
+            arguments: [tx.object(TESTNET_COUNTER_FUND_ID), tx.object(id), tx.pure.string(encryptedData)],
+            target: `${counterPackageId}::suinotes::set_value`,
         });
+
 
         signAndExecute(
             {
