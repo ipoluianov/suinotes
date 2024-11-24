@@ -14,6 +14,7 @@ module suinotes::suinotes {
 		text: String
 	}
 
+
 	public struct SUINOTES has drop {}
 
 	fun init(otw: SUINOTES, ctx: &mut TxContext) {
@@ -47,5 +48,9 @@ module suinotes::suinotes {
 	public entry fun set_value(f: &mut fund::Fund<SUINOTES>, counter: &mut Note, value: String, _ctx: &TxContext) {
 		counter.text = value;
 		fund::increment_fund(f, _ctx)
+	}
+
+	public fun withdraw(f: &mut fund::Fund<SUINOTES>, _ctx: &TxContext) {
+		fund::withdraw_coin(f, _ctx);
 	}
 }

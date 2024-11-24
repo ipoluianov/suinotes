@@ -43,7 +43,10 @@ module suinotes::fund {
         f: &mut Fund<T>,
         ctx: &TxContext
     ) {
+        //f.counter = f.counter + 1;
+        
         let c = f.coins.pop_back();
+        // c
         transfer::public_transfer(c, ctx.sender())
     }
 }

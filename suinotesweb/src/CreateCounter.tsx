@@ -7,6 +7,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import type { WalletAccount } from '@mysten/wallet-standard';
 import React from "react";
 import { DError, makeError } from "./error.ts";
+import { TESTNET_COUNTER_FUND_ID } from "./constants.ts";
 
 export function CreateCounter({
 	onCreated,
@@ -27,7 +28,7 @@ export function CreateCounter({
 
 	const [isCreating, setIsCreating] = React.useState(false);
 
-	const SNT_TYPE = '0xfe7893e78d9ad5e78d0d0585e636521e366676ce547545d5629cc149cf9a50bc::snt::SNT';
+	const SNT_TYPE = '0x688d228d71ac725d9f308fa6be32d014df2a6756394bf950783c603723ada55::snt::SNT';
 
 	const prepareCoin = async (account: WalletAccount, tx: Transaction, coinType: string, amount: bigint): (Promise<TransactionResult | DError>) => {
 		if (!account) {
@@ -95,7 +96,7 @@ export function CreateCounter({
 		}
 
 		tx.moveCall({
-			arguments: [tx.object("0x7dffc96776f81c41367a0430fbc89fcec32c518e4ac9320f3bd250047505f79f"), coin],
+			arguments: [tx.object(TESTNET_COUNTER_FUND_ID), coin],
 			target: `${counterPackageId}::suinotes::create`,
 		});
 

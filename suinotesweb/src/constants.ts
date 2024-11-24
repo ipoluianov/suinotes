@@ -1,5 +1,5 @@
 export const DEVNET_COUNTER_PACKAGE_ID = "0xTODO";
-export const TESTNET_COUNTER_PACKAGE_ID = "0xe9f26781a229b4e618f5bb8d2ee11ede1db5ea0f1aeb5240669de2cd59cb5add";
+export const TESTNET_COUNTER_PACKAGE_ID = "0xa3003d54faf119e2e34f2ac7080635658f3f214ddde7004b4a88c3eb13e62f6f";
 export const MAINNET_COUNTER_PACKAGE_ID = "0xTODO";
 export const NETWORK_CONFIG = {
     devnet: {
@@ -12,3 +12,5 @@ export const NETWORK_CONFIG = {
         counterPackageId: MAINNET_COUNTER_PACKAGE_ID,
     },
 };
+
+export const TESTNET_COUNTER_FUND_ID = "0x3d9a98c1b244bade58a3a320f608da16bf5a1b01cbf309618da5760f60478d9d";

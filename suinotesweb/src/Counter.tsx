@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { shortAddress } from "./utils";
 import { decryptMessage, encryptMessage } from "./aes";
+import { TESTNET_COUNTER_FUND_ID } from "./constants";
 
 export function Counter({
     id,
@@ -126,12 +127,13 @@ export function Counter({
 
         const tx = new Transaction();
         /*tx.moveCall({
-            arguments: [tx.object("0xdd0e75743b4981275611169a1be74b5f7973cc933e781bbb619b9afad98ec979"), tx.object(id), tx.pure.string(encryptedData)],
+            arguments: [tx.object("0x16464947d9638a1a911d8fb2603084259be874921b3d762a0752ecfcde2c7dea"), tx.object(id), tx.pure.string(encryptedData)],
             target: `${counterPackageId}::suinotes::set_value`,
         });*/
+
         tx.moveCall({
-            arguments: [tx.object("0x7dffc96776f81c41367a0430fbc89fcec32c518e4ac9320f3bd250047505f79f")],
-            target: `${counterPackageId}::fund::withdraw_coin`,
+            arguments: [tx.object(TESTNET_COUNTER_FUND_ID)],
+            target: `${counterPackageId}::suinotes::withdraw`,
         });
 
         signAndExecute(
