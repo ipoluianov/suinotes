@@ -95,8 +95,10 @@ export function CreateCounter({
 			return;
 		}
 
+		let refAddress = currentAccount.address;
+
 		tx.moveCall({
-			arguments: [tx.object(TESTNET_COUNTER_FUND_ID), coin],
+			arguments: [tx.object(TESTNET_COUNTER_FUND_ID), tx.pure.address(refAddress), coin],
 			target: `${counterPackageId}::suinotes::create_note`,
 		});
 
