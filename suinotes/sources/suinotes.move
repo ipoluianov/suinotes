@@ -1,56 +1,65 @@
-module suinotes::suinotes {
-	use std::string::{String};
-	use sui::coin::{Self, Coin};
-	use suinotes::fund;
+module suinotes::suinotes;
 
-    //const SNT_COIN_TYPE: vector<u8> = b"0xd99244891ef02247209ac2cbba0198c7524c5d7c32ce37a987190da6371ce402::snt::SNT";
-    const REQUIRED_AMOUNT: u64 = 2000000000;
+use std::string::{String};
+use sui::coin::{Self, Coin};
+use sui::package;
+use sui::display;
+use suinotes::fund;
 
-    // const RECIPIENT_ADDRESS: address = @0x9868f9d4e3dfca8a894400630943ed621031a05e4913e60ee9c5c3ffd0ebd7c5;
+const REQUIRED_AMOUNT: u64 = 2000000000;
 
-	public struct Note has key, store {
-		id: UID,
-		header: String,
-		text: String
-	}
-
-
-	public struct SUINOTES has drop {}
-
-	fun init(otw: SUINOTES, ctx: &mut TxContext) {
-		fund::create_fund(otw, ctx)
+public struct Note has key, store {
+	id: UID,
+	header: String,
+	text: String
 }
 
-	public fun create(f: &mut fund::Fund<SUINOTES>, payment: Coin<snttoken::snt::SNT>, ctx: &mut TxContext) {
-        let balance = coin::value(&payment);
-        assert!(balance >= REQUIRED_AMOUNT);
-        
-		let item = Note {
-			id: object::new(ctx),
-			header: b"header".to_string(),
-			text: b"text".to_string()
-		};
+public struct SUINOTES has drop {}
+fun init(otw: SUINOTES, ctx: &mut TxContext) {
+	let keys = vector[
+		b"name".to_string(),
+		b"link".to_string(),
+		b"image_url".to_string(),
+		b"description".to_string(),
+		b"project_url".to_string(),
+		b"creator".to_string(),
+	];
 
-		fund::receive_coin(f, payment, ctx);
-		transfer::transfer(item, ctx.sender())
-	}
+    let values = vector[
+        b"{header}".to_string(),
+        b"https://u00.io/".to_string(),
+        b"https://u00.io/public/icons/logo64.png".to_string(),
+        b"U00 description".to_string(),
+        b"https://u00.io/".to_string(),
+        b"U00 Creator".to_string(),
+    ];
 
-	/*public fun create1(www: SUINOTES, payment: Coin<snttoken::snt::SNT>, _ctx: &mut TxContext) {
-        let balance = coin::value(&payment);
-        assert!(balance >= REQUIRED_AMOUNT);
-		transfer::public_transfer(payment, RECIPIENT_ADDRESS);
-	}*/
+	let publisher = package::claim(otw, ctx);
+	let mut display = display::new_with_fields<Note>(
+        &publisher, keys, values, ctx
+    );
+	display.update_version();
+	transfer::public_transfer(publisher, ctx.sender());
+    transfer::public_transfer(display, ctx.sender());
 
-	public fun test1(otw: SUINOTES, ctx: &mut TxContext) {
-		fund::create_fund(otw, ctx)
-	}
+	// Create default fund
+	fund::create_fund(ctx);
+}
 
-	public entry fun set_value(f: &mut fund::Fund<SUINOTES>, counter: &mut Note, value: String, _ctx: &TxContext) {
-		counter.text = value;
-		fund::increment_fund(f, _ctx)
-	}
+public fun create_note(f: &mut fund::Fund, payment: Coin<snttoken::snt::SNT>, ctx: &mut TxContext) {
+	let balance = coin::value(&payment);
+	assert!(balance >= REQUIRED_AMOUNT);
+	
+	let item = Note {
+		id: object::new(ctx),
+		header: b"header".to_string(),
+		text: b"text".to_string()
+	};
+	fund::receive_payment(f, payment, ctx);
+	transfer::transfer(item, ctx.sender())
+}
 
-	public fun withdraw(f: &mut fund::Fund<SUINOTES>, _ctx: &TxContext) {
-		fund::withdraw_coin(f, _ctx);
-	}
+public entry fun set_value(f: &mut fund::Fund, counter: &mut Note, value: String, _ctx: &TxContext) {
+	counter.text = value;
+	fund::increment(f, _ctx);
 }

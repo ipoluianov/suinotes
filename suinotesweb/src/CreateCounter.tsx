@@ -97,7 +97,7 @@ export function CreateCounter({
 
 		tx.moveCall({
 			arguments: [tx.object(TESTNET_COUNTER_FUND_ID), coin],
-			target: `${counterPackageId}::suinotes::create`,
+			target: `${counterPackageId}::suinotes::create_note`,
 		});
 
 		setIsCreating(true);

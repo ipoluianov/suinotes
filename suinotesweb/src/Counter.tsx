@@ -133,7 +133,7 @@ export function Counter({
 
         tx.moveCall({
             arguments: [tx.object(TESTNET_COUNTER_FUND_ID)],
-            target: `${counterPackageId}::suinotes::withdraw`,
+            target: `${counterPackageId}::fund::withdraw`,
         });
 
         signAndExecute(
